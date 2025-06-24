@@ -22,29 +22,46 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
     {
         List<Product> products = new ArrayList<>();
+        List<String> filters = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-        String sql = "SELECT * FROM products " +
-                "WHERE (category_id = ? OR ? = -1) " +
-                "   AND (price <= ? OR ? = -1) " +
-                "   AND (color = ? OR ? = '') ";
+        StringBuilder query = new StringBuilder("SELECT * FROM products");
 
-        categoryId = categoryId == null ? -1 : categoryId;
-        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
-        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
-        color = color == null ? "" : color;
-
-        try (Connection connection = getConnection())
+        if (categoryId != null)
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
-            statement.setInt(2, categoryId);
-            statement.setBigDecimal(3, minPrice);
-            statement.setBigDecimal(4, minPrice);
-            statement.setString(5, color);
-            statement.setString(6, color);
+            filters.add("category_id = ?");
+            params.add(categoryId);
+        }
+        if (minPrice != null)
+        {
+            filters.add("price >= ?");
+            params.add(minPrice);
+        }
+        if (maxPrice != null)
+        {
+            filters.add("price <= ?");
+            params.add(maxPrice);
+        }
+        if (color != null && !color.trim().isEmpty())
+        {
+            filters.add("color = ?");
+            params.add(color);
+        }
+
+        if (!filters.isEmpty())
+        {
+            query.append(" WHERE ").append(String.join(" AND ", filters));
+        }
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query.toString()))
+        {
+            for (int i = 0; i < params.size(); i++)
+            {
+                statement.setObject(i + 1, params.get(i));
+            }
 
             ResultSet row = statement.executeQuery();
-
             while (row.next())
             {
                 Product product = mapRow(row);
