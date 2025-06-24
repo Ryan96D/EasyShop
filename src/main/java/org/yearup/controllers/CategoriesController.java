@@ -2,6 +2,7 @@ package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.data.CategoryDao;
@@ -33,9 +34,15 @@ public class CategoriesController
     }
 
     @GetMapping("/{id}") // GET /categories/{id}
-    public Category getById(@PathVariable int id)
+    public ResponseEntity<Category> getById(@PathVariable int id)
     {
-        return categoryDao.getById(id);
+        Category category = categoryDao.getById(id);
+
+        if (category == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
     @GetMapping("/{categoryId}/products")
