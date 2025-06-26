@@ -80,7 +80,7 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error adding product to cart.", e);
+            throw new RuntimeException("Error adding to cart.", e);
         }
     }
 
@@ -103,7 +103,23 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating product quantity.", e);
+            throw new RuntimeException("Error updating quantity.", e);
+        }
+    }
+
+    @Override
+    public void clearCart(int userId)
+    {
+        String sql = "DELETE FROM shopping_cart WHERE user_id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error clearing shopping cart.", e);
         }
     }
 }
