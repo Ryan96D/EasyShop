@@ -12,6 +12,7 @@ import org.yearup.models.ShoppingCart;
 import org.yearup.models.User;
 
 import java.security.Principal;
+import java.util.Map;
 
 
 @RestController
@@ -76,7 +77,26 @@ public class ShoppingCartController
     // add a PUT method to update an existing product in the cart - the url should be
     // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
+    @PutMapping("/products/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateQuantity(@PathVariable int id,
+                               @RequestBody Map<String, Integer> body,
+                               Principal principal)
+    {
+        try
+        {
+            int quantity = body.getOrDefault("quantity", 1);
 
+            String userName = principal.getName();
+            User user = userDao.getByUserName(userName);
+
+            shoppingCartDao.updateQuantity(user.getId(), id, quantity);
+        }
+        catch (Exception e)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update cart item.", e);
+        }
+    }
 
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart
