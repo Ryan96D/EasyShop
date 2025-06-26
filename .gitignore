@@ -1,31 +1,30 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**
-!**/src/test/**
+# macOS system files
+.DS_Store
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IDEs and build tools
+.idea/
+.vscode/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+target/
 build/
 
-### VS Code ###
-.vscode/
+# Java class and package files
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Node modules (if frontend is used)
+node_modules/
+
+# OS junk
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
