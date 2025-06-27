@@ -8,6 +8,6 @@ import java.util.List;
 public interface ReceiptDao
 {
     Receipt createReceipt(int userId, List<CheckoutItems> items);
-    
+
     List<Receipt> getReceiptsByUserId(int userId);
 }
