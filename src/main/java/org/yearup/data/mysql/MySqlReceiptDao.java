@@ -23,7 +23,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
     @Override
     public Receipt createReceipt(int userId, List<CheckoutItems> items)
     {
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (CheckoutItems item : items) {
             if (item.getProduct() == null) {
@@ -36,10 +36,10 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
             }
             int quantity = item.getQuantity();
             BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
-            totalAmount = totalAmount.add(subtotal);
+            total = total.add(subtotal);
         }
 
-        String insertReceiptSql = "INSERT INTO receipts (user_id, total_amount, date) VALUES (?, ?, NOW())";
+        String insertReceiptSql = "INSERT INTO receipts (user_id, total, date) VALUES (?, ?, NOW())";
         String insertItemSql = "INSERT INTO checkout_items (receipt_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = getConnection()) {
@@ -47,7 +47,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
 
             try (PreparedStatement receiptStmt = conn.prepareStatement(insertReceiptSql, Statement.RETURN_GENERATED_KEYS)) {
                 receiptStmt.setInt(1, userId);
-                receiptStmt.setBigDecimal(2, totalAmount);
+                receiptStmt.setBigDecimal(2, total);
                 receiptStmt.executeUpdate();
 
                 ResultSet keys = receiptStmt.getGeneratedKeys();
@@ -67,7 +67,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
 
                     conn.commit();
 
-                    return new Receipt(receiptId, userId, totalAmount, LocalDateTime.now(), items);
+                    return new Receipt(receiptId, userId, total, LocalDateTime.now(), items);
                 } else {
                     conn.rollback();
                     throw new SQLException("Failed to retrieve receipt ID.");
@@ -78,6 +78,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException("Error creating receipt.", e);
         }
     }
@@ -96,7 +97,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
 
             while (rs.next()) {
                 int receiptId = rs.getInt("receipt_id");
-                BigDecimal total = rs.getBigDecimal("total_amount");
+                BigDecimal total = rs.getBigDecimal("total");
                 Timestamp timestamp = rs.getTimestamp("date");
                 LocalDateTime date = timestamp.toLocalDateTime();
 
@@ -122,6 +123,7 @@ public class MySqlReceiptDao extends MySqlDaoBase implements ReceiptDao
                 receipts.add(new Receipt(receiptId, userId, total, date, items));
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException("Error retrieving receipts.", e);
         }
 
