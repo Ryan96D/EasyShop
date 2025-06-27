@@ -11,6 +11,15 @@ public class Receipt {
     private BigDecimal total;
     private List<CheckoutItems> items;
 
+    public Receipt(int receiptId, int userId, BigDecimal total, LocalDateTime date, List<CheckoutItems> items)
+    {
+        this.receiptId = receiptId;
+        this.userId = userId;
+        this.total = total;
+        this.date = date;
+        this.items = items;
+    }
+
     public int getReceiptId() {
         return receiptId;
     }
