@@ -54,8 +54,7 @@ public class ProfileController
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateProfile(@RequestBody Profile profile, Principal principal)
+    public Profile updateProfile(@RequestBody Profile profile, Principal principal)
     {
         try
         {
@@ -63,7 +62,7 @@ public class ProfileController
             User user = userDao.getByUserName(username);
 
             profile.setUserId(user.getId());
-            profileDao.update(profile);
+            return profileDao.update(profile); // Return updated profile with 200 OK
         }
         catch (Exception e)
         {

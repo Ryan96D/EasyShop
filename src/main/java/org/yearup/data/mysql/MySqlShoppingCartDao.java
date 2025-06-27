@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 @Component
 public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDao
@@ -21,34 +22,47 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     }
 
     @Override
-    public ShoppingCart getByUserId(int userId)
-    {
+    public ShoppingCart getByUserId(int userId) {
         ShoppingCart cart = new ShoppingCart();
+        cart.setItems(new HashMap<>());
 
         String sql = """
-            SELECT sc.product_id, sc.quantity,
-                   p.name, p.description, p.price, p.category_id, p.color, p.stock, p.image_url, p.featured
-            FROM shopping_cart sc
-            JOIN products p ON sc.product_id = p.product_id
-            WHERE sc.user_id = ?
-        """;
+            SELECT
+                sc.product_id,
+                sc.quantity,
+                p.product_id as productId,
+                p.name,
+                p.price,
+                p.category_id as categoryId,
+                p.description,
+                p.color,
+                p.stock,
+                p.image_url as imageUrl,
+                p.featured
+            FROM
+                shopping_cart sc
+            JOIN
+                products p ON sc.product_id = p.product_id
+            WHERE
+                sc.user_id = ?
+            """;
 
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var connection = getConnection();
+             var ps = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
+            ps.setInt(1, userId);
+            var rs = ps.executeQuery();
 
             while (rs.next()) {
                 Product product = new Product();
-                product.setProductId(rs.getInt("product_id"));
+                product.setProductId(rs.getInt("productId"));
                 product.setName(rs.getString("name"));
-                product.setDescription(rs.getString("description"));
                 product.setPrice(rs.getBigDecimal("price"));
-                product.setCategoryId(rs.getInt("category_id"));
+                product.setCategoryId(rs.getInt("categoryId"));
+                product.setDescription(rs.getString("description"));
                 product.setColor(rs.getString("color"));
                 product.setStock(rs.getInt("stock"));
-                product.setImageUrl(rs.getString("image_url"));
+                product.setImageUrl(rs.getString("imageUrl"));
                 product.setFeatured(rs.getBoolean("featured"));
 
                 ShoppingCartItem item = new ShoppingCartItem();
@@ -57,12 +71,10 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
                 cart.add(item);
             }
-
+            return cart;
         } catch (SQLException e) {
-            throw new RuntimeException("Error retrieving shopping cart.", e);
+            throw new RuntimeException("Error retrieving shopping cart", e);
         }
-
-        return cart;
     }
 
     @Override
