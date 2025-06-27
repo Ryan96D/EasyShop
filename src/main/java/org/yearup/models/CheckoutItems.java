@@ -2,18 +2,25 @@ package org.yearup.models;
 
 import java.math.BigDecimal;
 
-public class CheckoutItems {
-    private int productId;
+public class CheckoutItems
+{
+    private Product product;
     private int quantity;
-    private BigDecimal price;
-    private String productName;
 
-    public int getProductId() {
-        return productId;
+    public CheckoutItems() {
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public CheckoutItems(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public int getQuantity() {
@@ -23,21 +30,4 @@ public class CheckoutItems {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
 }
